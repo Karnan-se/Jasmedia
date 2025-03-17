@@ -10,9 +10,6 @@ connectDB()
 
 
 
-
-
-
 app.listen(configKeys.PORT_NUMBER, ()=>{
     console.log("server created")
 })

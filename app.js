@@ -7,7 +7,6 @@ const app = express();
 
 connectDB()
 
-// hello thwahir
 // "k2jjk2"
 
 

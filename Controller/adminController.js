@@ -7,6 +7,8 @@ export const userLogin = async (req, res, next) => {
   try {
 
     const { email, password } = req.body;
+    console.log(req)
+    console.log(email, password)
     if (!email) {
       throw AppError.conflict("Missing Emailaddress");
     }

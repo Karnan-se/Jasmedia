@@ -12,7 +12,6 @@ const app = express();
 
 app.use(cors({
     origin:configKeys.CLIENT_ORGIN,
-    
 }))
 app.use(cookieParser())
 app.use(express.json())

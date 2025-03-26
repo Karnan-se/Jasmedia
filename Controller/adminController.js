@@ -2,6 +2,8 @@ import AppError from "../utils/AppError.js";
 import { AdminModel } from "../Model/adminModel.js";
 import { hashPassword } from "../utils/passwordService.js";
 import { comparePassword } from "../utils/passwordService.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.js";
+import { attachTokenCookie } from "../utils/cookie.js";
 
 export const userLogin = async (req, res, next) => {
   try {
@@ -13,19 +15,33 @@ export const userLogin = async (req, res, next) => {
     if (!password) {
       throw AppError.conflict("Missing Password");
     }
-    const isEmailExist = await AdminModel.findOne({ emailAddress: email });
-    if (!isEmailExist) {
+    const adminDetails = await AdminModel.findOne({ emailAddress: email });
+    if (!adminDetails) {
       throw AppError.validation("User Not Registered");
     }
     const comparedPassword = await comparePassword(
       password,
-      isEmailExist.password
+      adminDetails.password
     );
     if (!comparedPassword) {
       throw AppError.validation("Password Not Mathing");
     }
+    const accessToken = generateAccessToken(adminDetails._id)
+    if(!accessToken){
+      throw AppError.conflict("Error creating accessToken")
+    }
+    console.log(accessToken , "AccessToken" , "\n" , "\n")
+    const refreshToken  = generateRefreshToken(adminDetails._id)
+    if(!refreshToken){
+      throw AppError.conflict("Error creating the refreshToken")
+    }
+    console.log(refreshToken  ,  "refreshToken")
+    attachTokenCookie("AccessToken", accessToken, res)
+    attachTokenCookie("RefreshToken", refreshToken, res)
+    
 
-    return res.status(200).json({ isEmailExist });
+
+    return res.status(200).json({ adminDetails });
   } catch (error) {
     console.log(error);
     next(error);

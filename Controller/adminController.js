@@ -9,7 +9,7 @@ export const userLogin = async (req, res, next) => {
   try {
 
     const { email, password } = req.body;
-    console.log(req)
+    // console.log(req)
     console.log(email, password)
     if (!email) {
       throw AppError.conflict("Missing Emailaddress");
@@ -32,12 +32,12 @@ export const userLogin = async (req, res, next) => {
     if(!accessToken){
       throw AppError.conflict("Error creating accessToken")
     }
-    console.log(accessToken , "AccessToken" , "\n" , "\n")
+    // console.log(accessToken , "AccessToken" , "\n" , "\n")
     const refreshToken  = generateRefreshToken(adminDetails._id)
     if(!refreshToken){
       throw AppError.conflict("Error creating the refreshToken")
     }
-    console.log(refreshToken  ,  "refreshToken")
+    // console.log(refreshToken  ,  "refreshToken")
     attachTokenCookie("AccessToken", accessToken, res)
     attachTokenCookie("RefreshToken", refreshToken, res)
     
@@ -45,7 +45,7 @@ export const userLogin = async (req, res, next) => {
 
     return res.status(200).json({ adminDetails });
   } catch (error) {
-    console.log(error);
+    console.log(error, 'this is value');
     next(error);
   }
 };

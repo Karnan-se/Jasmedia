@@ -16,7 +16,7 @@ const errorHandler =(err, req, res , next)=>{
 
         return res.status(StatusCodes).json(responseData)
     }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR),json({message : ReasonPhrases.INTERNAL_SERVER_ERROR})
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message : ReasonPhrases.INTERNAL_SERVER_ERROR})
 
 }
 export default errorHandler

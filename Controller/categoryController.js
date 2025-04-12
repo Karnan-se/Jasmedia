@@ -19,7 +19,7 @@ export const addCategory =async(req, res, next)=>{
 
 export const getCategory = async(req, res, next)=>{
     try {
-        const category = await categoryModel.find()
+        const category = await categoryModel.find().sort({ createdAt: -1 });
         res.status(HttpStatus.OK).json({category})
         
     } catch (error) {

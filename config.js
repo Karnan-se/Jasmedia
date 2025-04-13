@@ -11,4 +11,8 @@ export const configKeys = {
     ACCESS_TOKEN_EXPIRES_IN :15 * 60 * 1000,
     REFRESH_TOKEN_EXPIRES_IN : 7 * 24 * 60 * 60 * 1000,
 
+    Cloudinary_cloud_name: process.env.CLOUD_NAME,
+    Cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
+    Cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+
 }

@@ -7,7 +7,7 @@ const jwtAuth = async (req, res, next) => {
   const accessToken = req.cookies["AccessToken"];
   const refreshToken = req.cookies["RefreshToken"];
 
-console.log(refreshToken , "refreshToken")
+console.log(refreshToken , "refreshToken iam reached here -------------------------------------------------------------------------")
 
   if (!refreshToken) {
     console.log("Token is missing");

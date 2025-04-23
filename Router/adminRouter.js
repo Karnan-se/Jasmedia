@@ -6,6 +6,7 @@ import { RequestSignedUrl } from "../Controller/cloudinary.js";
 import { createPortFolio, deletePortfolio, editPortfolio } from "../Controller/PortfolioController.js";
 import { toggleStatus } from "../Controller/categoryController.js";
 import { getPortFolio } from "../Controller/PortfolioController.js";
+import { addFeedback, deleteFeedback, editFeedback, getAllFeedback } from "../Controller/feedbackController.js";
 
 const adminrouter = express.Router();
 
@@ -22,6 +23,12 @@ adminrouter.post("/portfolio", createPortFolio)
 adminrouter.post("/updatePortfolio" , editPortfolio)
 adminrouter.get("/getPortfolio", getPortFolio)
 adminrouter.delete("/deletePortfolio", deletePortfolio)
+
+adminrouter.get("/feedback", getAllFeedback)
+adminrouter.put("/editFeedback", editFeedback)
+adminrouter.delete("/deleteFeedback", deleteFeedback)
+adminrouter.post("/addFeedback", addFeedback)
+
 
 
 

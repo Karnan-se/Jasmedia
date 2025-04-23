@@ -37,8 +37,42 @@ export const editPortfolio = async(req, res, next)=>{
         return next(AppError.notFound("Portfolio not found"));
       }
     
-      res.status(200).json(updatedPortfolio);
+      res.status(HttpStatus.OK).json(updatedPortfolio);
     } catch (error) {
       next(error);
     }
 }
+
+export const getPortFolio = async(req, res, next)=>{
+  try {
+    console.log("get portfolio")
+    const portfolio = await Portfolio.find().populate("category")
+    res.status(HttpStatus.OK).json({data:portfolio})
+    
+  } catch (error) {
+    console.log(error)
+    throw error
+    
+  }
+}
+export const deletePortfolio = async (req, res, next) => {
+  try {
+    const { portfolioId } = req.body;
+
+    if (!portfolioId) {
+      throw AppError.conflict("portfolioId not found");
+    }
+
+    const result = await Portfolio.deleteOne({ _id: portfolioId });
+
+    if (result.deletedCount === 0) {
+      throw AppError.conflict("Portfolio does not exist");
+    }
+
+    res.status(HttpStatus.OK).json({ message: "Portfolio deleted" });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};

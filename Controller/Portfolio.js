@@ -19,3 +19,26 @@ export const createPortFolio = async(req, res, next)=>{
         
     }
 }
+export const editPortfolio = async(req, res, next)=>{
+    const { _id, portfolio } = req.body;
+
+    if (!_id || !portfolio) {
+      return next(AppError.conflict("No Id or portfolio"));
+    }
+    
+    try {
+      const updatedPortfolio = await Portfolio.findByIdAndUpdate(
+        _id,
+        { $set: { ...portfolio } },
+        { new: true }
+      );
+    
+      if (!updatedPortfolio) {
+        return next(AppError.notFound("Portfolio not found"));
+      }
+    
+      res.status(200).json(updatedPortfolio);
+    } catch (error) {
+      next(error);
+    }
+}

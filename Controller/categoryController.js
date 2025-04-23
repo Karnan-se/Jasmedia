@@ -57,4 +57,17 @@ export const updateCategory = async (req, res, next) => {
     }
 };
 
+export const toggleStatus = async(req, res, next)=>{
+    try {
+        const {categoryId} = req.body;
+        const category = await categoryModel.findOne({_id:categoryId})
+        category.status = !category.status;
+        await categoryModel.save()
+        res.status(HttpStatus.OK).json({message:category.status == true ? "categoryBlocked Successfully" : "category unblocked"})
+    } catch (error) {
+        throw error;
+        
+    }
+}
+
 

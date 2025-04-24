@@ -14,5 +14,7 @@ export const configKeys = {
     Cloudinary_cloud_name: process.env.CLOUD_NAME,
     Cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
     Cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+    Google_client_Id: process.env.Google_Client_Id,
+    Google_User_Password : process.env.GoogleUserPassword
 
 }

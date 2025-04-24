@@ -5,6 +5,7 @@ import { connectDB } from "./Services/ServerConnection.js";
 import errorHandler from "./middleware/middleware.js";
 import cors from "cors"
 import adminrouter from "./Router/adminRouter.js";
+import userRouter from "./Router/userRouter.js";
 
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended : true} ))
 
 app.use("/admin", adminrouter)
+app.use("/user", userRouter)
 
 
 

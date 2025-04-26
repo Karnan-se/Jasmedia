@@ -76,3 +76,17 @@ export const deletePortfolio = async (req, res, next) => {
     next(error);
   }
 };
+
+export const togglePortfolio = async(req, res, next)=>{
+  try {
+    const {portfolioId} = req.body
+    const portfolio = await Portfolio.findOne({_id:portfolioId})
+    portfolio.status = !portfolio.status;
+    await portfolio.save()
+    res.status(HttpStatus.OK).json({message: "portfolio Blocked"})
+  } catch (error) {
+    console.log(error)
+    next(error)
+    
+  }
+}

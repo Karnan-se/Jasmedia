@@ -6,6 +6,7 @@ const portFolioSchema = new Schema({
   type: { type: String, enum: ["Image", "Video"], required: true },
   category: { type: Types.ObjectId, ref: "category" },
   publicId: { type: String },
+  status:{type:Boolean},
   secureUrl: { type: String }
 }, { timestamps: true });
 

@@ -1,6 +1,7 @@
 import { categoryModel } from "../Model/categoryModel.js"
 import { HttpStatus } from "../Enums/enum.js";
 import AppError from "../utils/AppError.js";
+import { Portfolio } from "../Model/PortFolio.js";
 
 
 export const addCategory =async(req, res, next)=>{
@@ -62,8 +63,18 @@ export const toggleStatus = async(req, res, next)=>{
         const {categoryId} = req.body;
         const category = await categoryModel.findOne({_id:categoryId})
         category.status = !category.status;
-        await categoryModel.save()
-        res.status(HttpStatus.OK).json({message:category.status == true ? "categoryBlocked Successfully" : "category unblocked"})
+        if(category.status == false){
+            const portfolio = await Portfolio.updateMany({category:category._id}, {$set:{status:false}})
+            console.log(portfolio, "portfolio blocked")
+
+        }else{
+            const portfolio = await Portfolio.updateMany({category:category._id}, {$set:{status:true}})
+            console.log(portfolio, "portfolio unblocked")
+        }
+        
+        
+        await category.save()
+        res.status(HttpStatus.OK).json({message:category.status == false ? "Category Blocked" : "Category Unblocked"})
     } catch (error) {
         throw error;
         

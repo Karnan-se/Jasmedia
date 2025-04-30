@@ -75,3 +75,21 @@ export const getAllFeedback = async (req, res, next) => {
       next(error);
     }
   };
+
+  export const feedbackToggle = async(req, res, next)=>{
+    try {
+      const {feedbackId} = req.body;
+      if(!feedbackId){
+        throw AppError.conflict("feedback Id is required")
+      }
+      const feedback = await Feedback.findOne({_id:feedbackId})
+      feedback.status = !feedback.status;
+      await feedback.save();
+      res.status(HttpStatus.OK).json({message : feedback.status == true ? "feedbackunblocked" : "feedbackBlocked"})
+
+      
+    } catch (error) {
+      next(error)
+      
+    }
+  }

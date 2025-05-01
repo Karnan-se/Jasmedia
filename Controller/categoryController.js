@@ -21,7 +21,14 @@ export const addCategory =async(req, res, next)=>{
 export const getCategory = async(req, res, next)=>{
     try {
         const category = await categoryModel.find().sort({ createdAt: -1 });
-        res.status(HttpStatus.OK).json({category})
+        const portfolio = await Portfolio.find();
+        const formatedCategory = category.map((cat)=>{
+            const matchingPort = portfolio.filter((port)=> port.category.toString() == cat._id.toString()).length
+            return {...cat.toObject(), totolPortfolio : matchingPort}
+           
+        })
+
+        res.status(HttpStatus.OK).json({category : formatedCategory})
         
     } catch (error) {
         console.log(error)

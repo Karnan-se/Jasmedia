@@ -7,6 +7,7 @@ import { createPortFolio, deletePortfolio, editPortfolio, togglePortfolio } from
 import { toggleStatus } from "../Controller/categoryController.js";
 import { getPortFolio } from "../Controller/PortfolioController.js";
 import { addFeedback, deleteFeedback, editFeedback, feedbackToggle, getAllFeedback } from "../Controller/feedbackController.js";
+import { adminDashboard } from "../Controller/adminDashboard.js";
 
 const adminrouter = express.Router();
 
@@ -32,6 +33,9 @@ adminrouter.put("/editFeedback", editFeedback)
 adminrouter.delete("/deleteFeedback", deleteFeedback)
 adminrouter.post("/addFeedback", addFeedback)
 adminrouter.put("/togglefeedback", feedbackToggle)
+
+
+adminrouter.get("/admindashboard", adminDashboard)
 
 
 

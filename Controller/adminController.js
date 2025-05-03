@@ -4,6 +4,9 @@ import { hashPassword } from "../utils/passwordService.js";
 import { comparePassword } from "../utils/passwordService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.js";
 import { attachTokenCookie } from "../utils/cookie.js";
+import GenerateOtp from "../Services/generateOtp.js";
+import { saveOtp } from "../Services/Redis.js";
+import { sendPasswordResetOTP } from "../Services/emailService.js";
 
 export const userLogin = async (req, res, next) => {
   try {
@@ -89,3 +92,25 @@ export const userRegister = async (req, res, next) => {
       next(error);
     }
   };
+
+  export const forgotPassword = async(req, res, next)=>{
+    try {
+      const {emailAddress} = req.body;
+      const userDetails = await AdminModel.findOne({emailAddress : emailAddress})
+      if(!userDetails){
+        throw AppError.conflict("Email Address not found")
+      }
+      const otp  = GenerateOtp()
+      const storedOtp =  await saveOtp(otp)
+      const {success , error} = await sendPasswordResetOTP(emailAddress , otp)
+      if(error){
+        console.log(error , "error in sending the mail")
+      }
+      return res.status(200).json({message: "Otp creaated send the mai;"})
+
+    } catch (error) {
+      console.log(error)
+      next(error)
+      
+    }
+  }

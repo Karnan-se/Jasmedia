@@ -102,6 +102,7 @@ export const userRegister = async (req, res, next) => {
       }
       const otp  = GenerateOtp()
       const storedOtp =  await saveOtp(otp)
+      console.log(storedOtp , "storedOtp")
       const {success , error} = await sendPasswordResetOTP(emailAddress , otp)
       if(error){
         console.log(error , "error in sending the mail")

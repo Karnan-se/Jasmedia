@@ -1,6 +1,6 @@
 import nodemailer  from "nodemailer"
-import { configKeys } from "../config"
-import { generateOTPEmailTemplate } from "./EmailTemplate";
+import { configKeys } from "../config.js"
+import { generateOTPEmailTemplate } from "./EmailTemplate.js";
 
 
 const transporter = nodemailer.createTransport({

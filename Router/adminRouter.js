@@ -1,5 +1,5 @@
 import express from "express"
-import { userLogin, userRegister } from "../Controller/adminController.js";
+import { changePassword, forgotPassword, userLogin, userRegister, verifyOtp } from "../Controller/adminController.js";
 import {addCategory, updateCategory, getCategory} from "../Controller/categoryController.js"
 import jwtAuth from "../middleware/authentication.js";
 import { RequestSignedUrl } from "../Controller/cloudinary.js";
@@ -33,6 +33,10 @@ adminrouter.put("/editFeedback", editFeedback)
 adminrouter.delete("/deleteFeedback", deleteFeedback)
 adminrouter.post("/addFeedback", addFeedback)
 adminrouter.put("/togglefeedback", feedbackToggle)
+
+adminrouter.get("/forgotPassword", forgotPassword )
+adminrouter.get("/verifyOtp", verifyOtp)
+adminrouter.put("/changePassword", changePassword)
 
 
 adminrouter.get("/admindashboard", adminDashboard)

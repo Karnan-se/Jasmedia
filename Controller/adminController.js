@@ -5,22 +5,23 @@ import { comparePassword } from "../utils/passwordService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.js";
 import { attachTokenCookie } from "../utils/cookie.js";
 import GenerateOtp from "../Services/generateOtp.js";
-import { saveOtp } from "../Services/Redis.js";
+import { saveOtp, verifyOtpRedis } from "../Services/Redis.js";
 import { sendPasswordResetOTP } from "../Services/emailService.js";
+
 
 export const userLogin = async (req, res, next) => {
   try {
 
-    const { email, password } = req.body;
+    const { emailAddress, password } = req.body;
     // console.log(req)
-    console.log(email, password)
-    if (!email) {
+    console.log(emailAddress, password)
+    if (!emailAddress) {
       throw AppError.conflict("Missing Emailaddress");
     }
     if (!password) {
       throw AppError.conflict("Missing Password");
     }
-    const adminDetails = await AdminModel.findOne({ emailAddress: email });
+    const adminDetails = await AdminModel.findOne({ emailAddress: emailAddress });
     if (!adminDetails) {
       throw AppError.validation("User Not Registered");
     }
@@ -55,9 +56,9 @@ export const userLogin = async (req, res, next) => {
 
 export const userRegister = async (req, res, next) => {
     try {
-      const { email, password } = req.body;
+      const { emailAddress, password } = req.body;
   
-      if (!email) {
+      if (!emailAddress) {
         throw AppError.conflict("Missing Email Address");
       }
       if (!password) {
@@ -65,7 +66,7 @@ export const userRegister = async (req, res, next) => {
       }
   
 
-      const existingUser = await AdminModel.findOne({ emailAddress: email });
+      const existingUser = await AdminModel.findOne({ emailAddress: emailAddress });
       if (existingUser) {
         throw AppError.validation("Email Already Registered");
       }
@@ -75,7 +76,7 @@ export const userRegister = async (req, res, next) => {
   
    
       const newUser = await AdminModel.create({
-        emailAddress: email,
+        emailAddress: emailAddress,
         password: hashedPassword,
       });
   
@@ -83,7 +84,7 @@ export const userRegister = async (req, res, next) => {
         message: "Registration successful",
         user: {
           id: newUser._id,
-          email: newUser.emailAddress,
+          emailAddress: newUser.emailAddress,
         },
       });
   
@@ -95,13 +96,13 @@ export const userRegister = async (req, res, next) => {
 
   export const forgotPassword = async(req, res, next)=>{
     try {
-      const {emailAddress} = req.body;
+      const {emailAddress} = req.query;
       const userDetails = await AdminModel.findOne({emailAddress : emailAddress})
       if(!userDetails){
         throw AppError.conflict("Email Address not found")
       }
       const otp  = GenerateOtp()
-      const storedOtp =  await saveOtp(otp)
+      const storedOtp =  await saveOtp(otp , emailAddress)
       console.log(storedOtp , "storedOtp")
       const {success , error} = await sendPasswordResetOTP(emailAddress , otp)
       if(error){
@@ -109,6 +110,46 @@ export const userRegister = async (req, res, next) => {
       }
       return res.status(200).json({message: "Otp creaated send the mai;"})
 
+    } catch (error) {
+      console.log(error)
+      next(error)
+      
+    }
+  }
+
+  export const verifyOtp = async(req, res , next)=>{
+    try {
+      const {emailAddress , otp} = req.query;
+      if(!otp) throw AppError.conflict("OtP notRecieved");
+      if(!emailAddress) throw AppError.conflict("Email not recieved")
+        const verified = await verifyOtpRedis(otp, emailAddress)
+      if(!verified){
+        throw AppError.conflict("Error verifiying user")
+      }
+      return res.status(200).json({message : "Otp verified" , verified})
+      
+    } catch (error) {
+      console.log(error);
+      next(error)
+      
+      
+    }
+  }
+
+  export const changePassword = async(req, res, next)=>{
+    try {
+      const {emailAddress , password} = req.body;
+      if(!emailAddress) throw AppError.conflict("no EmailAddress")
+        if(!password) throw AppError.conflict("no Password")
+          const isUser = await AdminModel.findOne({emailAddress : emailAddress })
+        if(!isUser){
+          throw AppError.conflict("User not registered")
+        }
+        isUser.password = password
+        await isUser.save()
+        return res.status(200).json({message : "Password changed succussfully"})
+      
+      
     } catch (error) {
       console.log(error)
       next(error)

@@ -21,22 +21,40 @@ await client.connect();
 // console.log(result)  
 
 
-
-export const saveOtp = async(otp , emailAddress)=>{
-try {
-    if(!emailAddress ||  !otp){
-        throw AppError.conflict("Email Address or Otp is not found")
+export const saveOtp = async (otp, emailAddress) => {
+  try {
+    if (!emailAddress || !otp) {
+      throw AppError.conflict("Email Address or Otp is not found");
     }
-    
-    
-    await client.set(`otp:${emailAddress}`, otp , {
-        expiration: 60 
+
+    const email = emailAddress.toString();
+    await client.set(`otp:${email}`, otp, {
+      EX: 60 
     });
-    const result = await client.get(`otp:${emailAddress}`)
-    return result
-    
-} catch (error) {
-    console.log(error)
-    
-}
+
+    const result = await client.get(`otp:${email}`);
+    return result;
+
+  } catch (error) {
+    console.log("Redis saveOtp error:", error);
+    throw error;
+  }
+};
+
+export const verifyOtpRedis = async(otp , email)=>{
+    try {
+          const result = await client.get(`otp:${email}`);
+          console.log(result , "result")
+          if(result == otp){
+            return result
+          }else {
+            throw AppError.conflict("otp is not matching")
+          }
+        
+    } catch (error) {
+        console.log(error)
+        throw error
+        
+    }
+
 }

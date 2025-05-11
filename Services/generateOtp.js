@@ -1,5 +1,6 @@
 export default function GenerateOtp(){
-    return Math.floor(Math.random()*9000)
-  
+    let otp = Math.floor(Math.random()*9000)
+    console.log(otp, "otp generater")
+    return otp
   }
   

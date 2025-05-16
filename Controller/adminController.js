@@ -156,3 +156,64 @@ export const userRegister = async (req, res, next) => {
       
     }
   }
+
+  export const createRootAdmin = async(req, res, next)=>{
+    try {
+
+      
+      const { emailAddress, password , isRootAdmin = false } = req.body;
+  
+      if (!emailAddress) {
+        throw AppError.conflict("Missing Email Address");
+      }
+      if (!password) {
+        throw AppError.conflict("Missing Password");
+      }
+  
+
+      const existingUser = await AdminModel.findOne({ emailAddress: emailAddress });
+      if (existingUser) {
+        throw AppError.validation("Email Already Registered");
+      }
+  
+
+      const hashedPassword = await hashPassword(password);
+  
+   
+      const newUser = await AdminModel.create({
+        emailAddress: emailAddress,
+        password: hashedPassword,
+        isRootAdmin
+      });
+      
+  
+      return res.status(201).json({
+        message: "Registration successful",
+        user: {
+          id: newUser._id,
+          emailAddress: newUser.emailAddress,
+        },
+      });
+      
+    } catch (error) {
+      console.log(error)
+      next(error)
+      
+    }
+  }
+
+  export const checkisRootAdmin = async(req )=>{
+    try {
+      console.log(req.user.id , "userId got from the middleware ")
+      const admin = await AdminModel.findOne({_id: req.user.id})
+      if(!admin.isRootAdmin){
+        throw AppError.validation("Access restricted by the Admin")
+        
+      }
+      return admin.isRootAdmin
+      
+    } catch (error) {
+      throw error
+      
+    }
+  }

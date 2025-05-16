@@ -1,6 +1,7 @@
 import { HttpStatus } from "../Enums/enum.js";
 import { Feedback } from "../Model/FeedbackModel.js";
 import AppError from "../utils/AppError.js";
+import { checkisRootAdmin } from "./adminController.js";
 
 
 export const addFeedback = async (req, res, next) => {
@@ -47,6 +48,12 @@ export const editFeedback = async (req, res, next) => {
 export const deleteFeedback = async (req, res, next) => {
   try {
     const { feedbackId } = req.body;
+
+        const isRootadmin = checkisRootAdmin(req)
+         if(!isRootadmin){
+          console.log("user has no Access")
+          return 
+         }
 
     if (!feedbackId) {
       throw AppError.conflict("Feedback ID is required");

@@ -1,6 +1,7 @@
 import { Portfolio } from "../Model/PortFolio.js"
 import { HttpStatus } from "../Enums/enum.js";
 import AppError from "../utils/AppError.js";
+import { checkisRootAdmin } from "./adminController.js";
 
 
 export const createPortFolio = async(req, res, next)=>{
@@ -58,6 +59,14 @@ export const getPortFolio = async(req, res, next)=>{
 export const deletePortfolio = async (req, res, next) => {
   try {
     const { portfolioId } = req.body;
+     console.log(req.user.id , "userId")
+     
+     const isRootadmin = checkisRootAdmin(req)
+     if(!isRootadmin){
+      console.log("user has no Access")
+      return 
+     }
+    
 
     if (!portfolioId) {
       throw AppError.conflict("portfolioId not found");

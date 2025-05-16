@@ -2,6 +2,8 @@ import { categoryModel } from "../Model/categoryModel.js"
 import { HttpStatus } from "../Enums/enum.js";
 import AppError from "../utils/AppError.js";
 import { Portfolio } from "../Model/PortFolio.js";
+import { checkisRootAdmin } from "./adminController.js";
+
 
 
 export const addCategory =async(req, res, next)=>{
@@ -41,6 +43,13 @@ export const getCategory = async(req, res, next)=>{
 export const updateCategory = async (req, res, next) => {
     try {
         const { name , categoryId} = req.body;
+      
+           const isRootadmin = checkisRootAdmin(req)
+            if(!isRootadmin){
+             console.log("user has no Access")
+             return 
+            }
+            console.log("Admin has Access")
        
 
         const isExistingCategory = await categoryModel.findOne({ name, _categoryId: { $ne: categoryId } });

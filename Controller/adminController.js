@@ -161,7 +161,7 @@ export const userRegister = async (req, res, next) => {
     try {
 
       
-      const { emailAddress, password , isRootAdmin = false } = req.body;
+      const { emailAddress, password ,  name ,  isRootAdmin = false } = req.body;
   
       if (!emailAddress) {
         throw AppError.conflict("Missing Email Address");
@@ -183,7 +183,8 @@ export const userRegister = async (req, res, next) => {
       const newUser = await AdminModel.create({
         emailAddress: emailAddress,
         password: hashedPassword,
-        isRootAdmin
+        isRootAdmin,
+        name,
       });
       
   
@@ -205,6 +206,9 @@ export const userRegister = async (req, res, next) => {
   export const checkisRootAdmin = async(req )=>{
     try {
       console.log(req.user.id , "userId got from the middleware ")
+      if(!req.user.id){
+        throw AppError.conflict("session Expired")
+      }
       const admin = await AdminModel.findOne({_id: req.user.id})
       if(!admin.isRootAdmin){
         throw AppError.validation("Access restricted by the Admin")

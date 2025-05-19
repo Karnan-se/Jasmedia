@@ -7,7 +7,9 @@ const portFolioSchema = new Schema({
   category: { type: Types.ObjectId, ref: "category" },
   publicId: { type: String },
   status:{type:Boolean , default:true},
-  secureUrl: { type: String }
+  secureUrl: { type: String },
+  createdBy:{type: String}
+
 }, { timestamps: true });
 
 export const Portfolio = mongoose.model("Portfolio", portFolioSchema);

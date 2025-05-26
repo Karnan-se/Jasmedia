@@ -100,3 +100,26 @@ export const toggleAdmin = async (req, res, next) => {
   }
 };
 
+export const deleteAdmin = async(req, res, next)=>{
+
+  try {
+    const {adminId} = req.body;
+
+    const isRootAdmin = await AdminModel.findById(adminId)
+
+   if(!isRootAdmin.isRootAdmin){
+    throw AppError.conflict("no Access to delete ")
+   }
+    const admin = await AdminModel.deleteOne({_id: adminId});
+    if(admin){
+       res.status(200).json({message: "successfully deleted"})
+    }
+   
+    
+  } catch (error) {
+    console.log(error)
+    next(error)
+    
+  }
+}
+

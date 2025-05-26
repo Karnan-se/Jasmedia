@@ -123,3 +123,4 @@ export const deleteAdmin = async(req, res, next)=>{
   }
 }
 
+

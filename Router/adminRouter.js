@@ -34,7 +34,7 @@ adminrouter.delete("/deleteFeedback", deleteFeedback)
 adminrouter.post("/addFeedback", addFeedback)
 adminrouter.put("/togglefeedback", feedbackToggle)
 
-adminrouter.get("/forgotPassword", forgotPassword )
+adminrouter.post("/forgotPassword", forgotPassword )
 adminrouter.get("/verifyOtp", verifyOtp)
 adminrouter.put("/changePassword", changePassword)
 

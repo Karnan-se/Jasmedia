@@ -96,8 +96,9 @@ export const userRegister = async (req, res, next) => {
 
   export const forgotPassword = async(req, res, next)=>{
     try {
-      const {emailAddress} = req.query;
+      const {emailAddress} = req.body;
       const userDetails = await AdminModel.findOne({emailAddress : emailAddress})
+
       if(!userDetails){
         throw AppError.conflict("Email Address not found")
       }

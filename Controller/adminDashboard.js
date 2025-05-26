@@ -5,6 +5,7 @@ import { HttpStatus } from "../Enums/enum.js";
 import { AdminModel } from "../Model/adminModel.js";
 import AppError from "../utils/AppError.js";
 import { checkisRootAdmin } from "./adminController.js";
+import { configKeys } from "../config.js";
 
 
 export const adminDashboard = async (req, res, next) => {
@@ -120,6 +121,25 @@ export const deleteAdmin = async(req, res, next)=>{
     console.log(error)
     next(error)
     
+  }
+}
+
+export const logout = async (req, res, next) => {
+  try {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: configKeys.NODE_ENV === "production",
+      signed: false,
+    }
+
+    res.clearCookie("AccessToken", cookieOptions);
+    res.clearCookie("RefreshToken", cookieOptions);
+
+    
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 }
 

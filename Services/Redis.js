@@ -1,14 +1,14 @@
 
 import AppError from "../utils/AppError.js";
-
+import { configKeys } from "../config.js"
 import { createClient } from 'redis';
 
 export const client = createClient({
     username: 'default',
-    password: 'c62XPCoKY6iqiwtkyuJ7MmCtX4DFqRxp',
+    password: 'CdhZDmIKsVFoKZEqQyjLAPectRwNuS1c',
     socket: {
-        host: 'redis-17853.c275.us-east-1-4.ec2.redns.redis-cloud.com',
-        port: 17853
+        host: 'redis-17411.crce179.ap-south-1-1.ec2.redns.redis-cloud.com',
+        port: 17411
     }
 });
 

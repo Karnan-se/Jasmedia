@@ -18,6 +18,8 @@ export const configKeys = {
     Google_User_Password : process.env.GoogleUserPassword,
 
     Mail: process.env.Email,
-    Mail_Password : process.env.MailPassword
+    Mail_Password : process.env.MailPassword,
+    Redis_Enpoint: process.env.REDIS_ENPOINT,
+    Redis_Password: process.env.REDIS_PASSWORD  
 
 }

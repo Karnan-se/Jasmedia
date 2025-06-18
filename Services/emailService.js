@@ -6,14 +6,15 @@ import { generateOTPEmailTemplate } from "./EmailTemplate.js";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: configKeys.Mail,
-    pass: configKeys.Mail_Password,
+    user: 'thwahirpvmohd@gmail.com',
+    pass: 'ksyw xmuv squc ozqj',
   },
 });
 
 
 export async function sendPasswordResetOTP(email, otp) {
   try {
+    console.log(configKeys.Mail)
     const mailOptions = {
       from: configKeys.Mail,
       to: email,

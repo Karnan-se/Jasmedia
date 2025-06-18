@@ -98,7 +98,7 @@ export const userRegister = async (req, res, next) => {
     try {
       const {emailAddress} = req.body;
       const userDetails = await AdminModel.findOne({emailAddress : emailAddress})
-
+      console.log(emailAddress)
       if(!userDetails){
         throw AppError.conflict("Email Address not found")
       }
@@ -162,7 +162,7 @@ export const userRegister = async (req, res, next) => {
     try {
 
       
-      const { emailAddress, password ,  name ,  isRootAdmin = false } = req.body;
+      const { emailAddress, password, name, isRootAdmin = false } = req.body;
   
       if (!emailAddress) {
         throw AppError.conflict("Missing Email Address");

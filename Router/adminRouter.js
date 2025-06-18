@@ -7,7 +7,7 @@ import { createPortFolio, deletePortfolio, editPortfolio, togglePortfolio } from
 import { toggleStatus } from "../Controller/categoryController.js";
 import { getPortFolio } from "../Controller/PortfolioController.js";
 import { addFeedback, deleteFeedback, editFeedback, feedbackToggle, getAllFeedback } from "../Controller/feedbackController.js";
-import { adminDashboard, deleteAdmin, toggleAdmin } from "../Controller/adminDashboard.js";
+import { adminDashboard, adminDetails, deleteAdmin, toggleAdmin } from "../Controller/adminDashboard.js";
 
 const adminrouter = express.Router();
 
@@ -15,34 +15,35 @@ const adminrouter = express.Router();
 adminrouter.post("/login", userLogin )
 adminrouter.post("/register", userRegister)
 
-adminrouter.post("/addCategory", jwtAuth ,  addCategory)
-adminrouter.get("/getcategory" ,jwtAuth ,  getCategory)
-adminrouter.post("/updateCategory", jwtAuth ,  updateCategory)
+adminrouter.post("/addCategory", jwtAuth,  addCategory)
+adminrouter.get("/getcategory" , jwtAuth,  getCategory)
+adminrouter.post("/updateCategory", jwtAuth,  updateCategory)
 adminrouter.put("/blockCategory", jwtAuth, toggleStatus )
 
-adminrouter.get("/signedUrl", RequestSignedUrl )
-adminrouter.post("/portfolio", createPortFolio)
-adminrouter.post("/updatePortfolio" , editPortfolio)
-adminrouter.get("/getPortfolio", getPortFolio)
-adminrouter.delete("/deletePortfolio", deletePortfolio)
-adminrouter.put("/togglePortfolio", togglePortfolio)
+adminrouter.get("/signedUrl", jwtAuth, RequestSignedUrl )
+adminrouter.post("/portfolio", jwtAuth, createPortFolio)
+adminrouter.post("/updatePortfolio", jwtAuth, editPortfolio)
+adminrouter.get("/getPortfolio", jwtAuth, getPortFolio)
+adminrouter.delete("/deletePortfolio", jwtAuth, deletePortfolio)
+adminrouter.put("/togglePortfolio", jwtAuth, togglePortfolio)
 
 
-adminrouter.get("/feedback", getAllFeedback)
-adminrouter.put("/editFeedback", editFeedback)
-adminrouter.delete("/deleteFeedback", deleteFeedback)
-adminrouter.post("/addFeedback", addFeedback)
-adminrouter.put("/togglefeedback", feedbackToggle)
+adminrouter.get("/feedback", jwtAuth, getAllFeedback)
+adminrouter.put("/editFeedback", jwtAuth, editFeedback)
+adminrouter.delete("/deleteFeedback", jwtAuth, deleteFeedback)
+adminrouter.post("/addFeedback", jwtAuth, addFeedback)
+adminrouter.put("/togglefeedback", jwtAuth, feedbackToggle)
 
 adminrouter.post("/forgotPassword", forgotPassword )
 adminrouter.get("/verifyOtp", verifyOtp)
 adminrouter.put("/changePassword", changePassword)
 
 
-adminrouter.get("/admindashboard", adminDashboard)
-adminrouter.post("/createRootadmin", createRootAdmin)
-adminrouter.put("/toggleAdmin", toggleAdmin)
-adminrouter.delete("/deleteAdmin", deleteAdmin)
+adminrouter.get("/admindashboard", jwtAuth, adminDashboard)
+adminrouter.post("/createRootadmin", jwtAuth, createRootAdmin)
+adminrouter.get("/getAdmins", jwtAuth, adminDetails)
+adminrouter.put("/toggleAdmin", jwtAuth, toggleAdmin)
+adminrouter.delete("/deleteAdmin", jwtAuth, deleteAdmin)
 
 
 

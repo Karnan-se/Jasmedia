@@ -66,13 +66,12 @@ export const editAdmin = async (req, res, next) => {
 
 export const toggleAdmin = async (req, res, next) => {
   try {
-    const { adminId } = req.body;
-
-         const isRootadmin = checkisRootAdmin(req)
-             if(!isRootadmin){
-              console.log("user has no Access")
-              return 
-             }
+    const requester = req.user
+    const { adminId } = req.body
+    
+    if(!requester.role){
+      throw AppError.badRequest("You do not have access to delete admins.")
+    }
 
     if (!adminId) {
       throw AppError.conflict("No admin ID provided");
@@ -100,26 +99,30 @@ export const toggleAdmin = async (req, res, next) => {
   }
 };
 
-export const deleteAdmin = async(req, res, next)=>{
+export const deleteAdmin = async (req, res, next)=>{
 
   try {
-    const {adminId} = req.body;
+    const requester = req.user
+    const targetAdminID = req.body.adminId
 
-    const isRootAdmin = await AdminModel.findById(adminId)
-
-   if(!isRootAdmin.isRootAdmin){
-    throw AppError.conflict("no Access to delete ")
-   }
-    const admin = await AdminModel.deleteOne({_id: adminId});
-    if(admin){
-       res.status(200).json({message: "successfully deleted"})
+    if(!requester.role){
+      throw AppError.badRequest("You do not have access to delete admins.")
     }
-   
-    
+
+    if(requester.id == targetAdminID){
+      throw AppError.badRequest("You cannot delete yourself.")
+    }
+
+    const targetAdmin = await AdminModel.findById(targetAdminID)
+    if(!targetAdmin){
+      throw AppError.notFound("Admin not found.")
+    }
+
+    await AdminModel.deleteOne({ _id: targetAdminID })
+    res.status(200).json({message: "Admin successfully deleted"})
   } catch (error) {
     console.log(error)
     next(error)
-    
   }
 }
 

@@ -8,6 +8,11 @@ import { checkisRootAdmin } from "./adminController.js";
 
 export const addCategory =async(req, res, next)=>{
     try {
+        const requester = req.user
+        if(requester.isBlocked) {
+            return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+        }
+        
         const {name , createdBy } = req.body
         
         const saveCategory = await categoryModel.create({name , createdBy});
@@ -22,6 +27,11 @@ export const addCategory =async(req, res, next)=>{
 
 export const getCategory = async(req, res, next)=>{
     try {
+        const requester = req.user
+        if(requester.isBlocked) {
+            return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+        }
+       
         const category = await categoryModel.find().sort({ createdAt: -1 });
         const portfolio = await Portfolio.find();
         const formatedCategory = category.map((cat)=>{
@@ -42,11 +52,13 @@ export const getCategory = async(req, res, next)=>{
 
 export const updateCategory = async (req, res, next) => {
     try {
+        const requester = req.user
         const { name , categoryId} = req.body;
-      
-        
-       
 
+        if(requester.isBlocked) {
+            return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+        }
+    
         const isExistingCategory = await categoryModel.findOne({ name, _categoryId: { $ne: categoryId } });
         if (isExistingCategory) {
             throw AppError.validation("Name already exists");
@@ -71,7 +83,16 @@ export const updateCategory = async (req, res, next) => {
 
 export const toggleStatus = async(req, res, next)=>{
     try {
+        const requester = req.user
         const {categoryId} = req.body;
+        
+        if(requester.isBlocked) {
+            return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+        }
+        if(!requester.role) {
+            return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to toggle category!" });
+        }
+        
         const category = await categoryModel.findOne({_id:categoryId})
         category.status = !category.status;
         if(category.status == false){

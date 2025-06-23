@@ -3,6 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 import { HttpStatus } from "../Enums/enum.js";
 export const RequestSignedUrl = async(req, res, next)=>{
     try {
+        const requester = req.user
+        if(requester.isBlocked) {
+            return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+        }
+        
        
         let  {resourseType = "auto"} = req.query;
         const timeStamp = Math.floor(Date.now())/1000;

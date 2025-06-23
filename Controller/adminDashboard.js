@@ -10,6 +10,11 @@ import { configKeys } from "../config.js";
 
 export const adminDashboard = async (req, res, next) => {
   try {
+    const requester = req.user
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+    }
+
     const totalCategory = (await categoryModel.find()).length;
     const totalportfolio = (await Portfolio.find()).length;
     const totalFeedback = (await Feedback.find()).length;
@@ -27,6 +32,11 @@ export const adminDashboard = async (req, res, next) => {
 
 export const adminDetails = async (req, res, next) => {
   try {
+    const requester = req.user
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+    }
+
     const admins = await AdminModel.find();
     res.status(HttpStatus.OK).json({ admins });
   } catch (error) {
@@ -69,9 +79,12 @@ export const toggleAdmin = async (req, res, next) => {
   try {
     const requester = req.user
     const { adminId } = req.body
-    
-    if(!requester.role){
-      throw AppError.badRequest("You do not have access to delete admins.")
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+    if(!requester.role) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to toggle admin!" });
     }
 
     if (!adminId) {
@@ -106,8 +119,11 @@ export const deleteAdmin = async (req, res, next)=>{
     const requester = req.user
     const targetAdminID = req.body.adminId
 
-    if(!requester.role){
-      throw AppError.badRequest("You do not have access to delete admins.")
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+    if(!requester.role) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to delete admin!" });
     }
 
     if(requester.id == targetAdminID){

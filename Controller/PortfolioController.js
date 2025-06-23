@@ -7,21 +7,32 @@ import { checkisRootAdmin } from "./adminController.js";
 export const createPortFolio = async(req, res, next)=>{
     try {
         const {portfolio} = req.body
+        const requester = req.user
+
+        if(requester.isBlocked) {
+          return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+        }
         if(!portfolio){
             return  AppError.validation("Error getting the details")
         }
+
         const Saveportfolio = await Portfolio.create(portfolio)
-        console.log(Saveportfolio , "portfolio Saved")
         res.status(HttpStatus.CREATED).json({message:"Portfolio Details saved Successfully" , data:Saveportfolio})
-        
     } catch (error) {
         console.log(error)
-        next(error)
-        
+        next(error)  
     }
 }
+
+
+
 export const editPortfolio = async(req, res, next)=>{
     const { _id, portfolio } = req.body;
+    const requester = req.user
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
 
     if (!_id || !portfolio) {
       return next(AppError.conflict("No Id or portfolio"));
@@ -44,12 +55,17 @@ export const editPortfolio = async(req, res, next)=>{
     }
 }
 
+
+
 export const getPortFolio = async(req, res, next)=>{
+  const requester = req.user
+  if(requester.isBlocked) {
+    return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+  }
+          
   try {
-    console.log("get portfolio")
     const portfolio = await Portfolio.find().populate("category")
     res.status(HttpStatus.OK).json({data:portfolio})
-    
   } catch (error) {
     console.log(error)
     throw error
@@ -58,15 +74,15 @@ export const getPortFolio = async(req, res, next)=>{
 }
 export const deletePortfolio = async (req, res, next) => {
   try {
+    const requester = req.user
     const { portfolioId } = req.body;
-     console.log(req.user.id , "userId")
-     
-     const isRootadmin = checkisRootAdmin(req)
-     if(!isRootadmin){
-      console.log("user has no Access")
-      return 
-     }
-    
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+    if(!requester.role) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to delete portfolio!" });
+    }
 
     if (!portfolioId) {
       throw AppError.conflict("portfolioId not found");
@@ -79,7 +95,6 @@ export const deletePortfolio = async (req, res, next) => {
     }
 
     res.status(HttpStatus.OK).json({ message: "Portfolio deleted" });
-
   } catch (error) {
     console.error(error);
     next(error);
@@ -88,7 +103,16 @@ export const deletePortfolio = async (req, res, next) => {
 
 export const togglePortfolio = async(req, res, next)=>{
   try {
+    const requester = req.user
     const {portfolioId} = req.body
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+    if(!requester.role) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to toggle portfolio!" });
+    }
+            
     const portfolio = await Portfolio.findOne({_id:portfolioId})
     portfolio.status = !portfolio.status;
     await portfolio.save()
@@ -96,6 +120,5 @@ export const togglePortfolio = async(req, res, next)=>{
   } catch (error) {
     console.log(error)
     next(error)
-    
   }
 }

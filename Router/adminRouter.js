@@ -35,7 +35,7 @@ adminrouter.post("/addFeedback", jwtAuth, addFeedback)
 adminrouter.put("/togglefeedback", jwtAuth, feedbackToggle)
 
 adminrouter.post("/forgotPassword", forgotPassword )
-adminrouter.get("/verifyOtp", verifyOtp)
+adminrouter.post("/verifyOtp", verifyOtp)
 adminrouter.put("/changePassword", changePassword)
 
 

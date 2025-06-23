@@ -69,12 +69,6 @@ export const deleteFeedback = async (req, res, next) => {
       return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to delete feedback!" });
     }
 
-        const isRootadmin = checkisRootAdmin(req)
-         if(!isRootadmin){
-          console.log("user has no Access")
-          return 
-         }
-
     if (!feedbackId) {
       throw AppError.conflict("Feedback ID is required");
     }

@@ -1,6 +1,8 @@
 import nodemailer  from "nodemailer"
 import { configKeys } from "../config.js"
-import { generateOTPEmailTemplate } from "./EmailTemplate.js";
+import { generateOTPEmailTemplate } from "./EmailTemplate.js"
+import { AdminModel } from "../Model/adminModel.js"
+import AppError from "../utils/AppError.js";
 
 
 const transporter = nodemailer.createTransport({
@@ -14,7 +16,6 @@ const transporter = nodemailer.createTransport({
 
 export async function sendPasswordResetOTP(email, otp) {
   try {
-    console.log(configKeys.Mail)
     const mailOptions = {
       from: configKeys.Mail,
       to: email,
@@ -24,10 +25,48 @@ export async function sendPasswordResetOTP(email, otp) {
 
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent:', info.messageId);
-    return { success: true };
+    return true;
   } catch (error) {
     console.error('Error sending email:', error);
-    return { success: false, error };
+    return false;
+  }
+}
+
+
+export const saveOtp = async (otp, emailAddress) => {
+  try {
+    const user = await AdminModel.findOne({emailAddress: emailAddress})
+    if(!user){
+      throw AppError.conflict('Email address not exits!')
+    }
+
+    user.otp = otp
+    await user.save()
+  } catch (error) {
+    throw error
+  }
+
+}
+
+export const otpVerify = async (otp, emailAddress) => {
+  try {
+    const user = await AdminModel.findOne({emailAddress: emailAddress})
+
+    if(!user){
+      throw AppError.conflict('Email address not exits!')
+    }
+    if(!user.otp){
+      throw AppError.validation('Failed!. Try with new OTP')
+    }
+
+    if(user.otp == otp){
+      user.otp = ''
+      await user.save()
+      return true
+    }
+    return false
+  } catch (error) {
+    throw error
   }
 }
 

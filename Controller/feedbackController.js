@@ -6,7 +6,13 @@ import { checkisRootAdmin } from "./adminController.js";
 
 export const addFeedback = async (req, res, next) => {
   try {
+    const requester = req.user
     const { feedback } = req.body;
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+    
     if (!feedback) throw AppError.conflict("Error creating the feedback");
 
     const savedFeedback = await Feedback.create({...feedback});
@@ -21,7 +27,13 @@ export const addFeedback = async (req, res, next) => {
 
 export const editFeedback = async (req, res, next) => {
   try {
+    const requester = req.user
     const { feedback } = req.body;
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+            
     if (!feedback || !feedback._id) {
       throw AppError.conflict("No feedback or feedbackId provided");
     }
@@ -47,7 +59,15 @@ export const editFeedback = async (req, res, next) => {
 
 export const deleteFeedback = async (req, res, next) => {
   try {
+    const requester = req.user
     const { feedbackId } = req.body;
+
+    if(requester.isBlocked) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+    }
+    if(!requester.role) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to delete feedback!" });
+    }
 
         const isRootadmin = checkisRootAdmin(req)
          if(!isRootadmin){
@@ -75,6 +95,11 @@ export const deleteFeedback = async (req, res, next) => {
 
 export const getAllFeedback = async (req, res, next) => {
     try {
+      const requester = req.user
+      if(requester.isBlocked) {
+        return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+      }
+              
       const feedbacks = await Feedback.find().sort({ createdAt: -1 }); 
       return res.status(HttpStatus.OK).json({ message: "All feedback fetched", data: feedbacks });
     } catch (error) {
@@ -85,7 +110,16 @@ export const getAllFeedback = async (req, res, next) => {
 
   export const feedbackToggle = async(req, res, next)=>{
     try {
+      const requester = req.user
       const {feedbackId} = req.body;
+      
+      if(requester.isBlocked) {
+        return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
+      }
+      if(!requester.role) {
+        return res.status(HttpStatus.BAD_REQUEST).json({ message: "Oops! You're not allowed to toggle Feedback!" });
+      }
+          
       if(!feedbackId){
         throw AppError.conflict("feedback Id is required")
       }
@@ -93,10 +127,7 @@ export const getAllFeedback = async (req, res, next) => {
       feedback.status = !feedback.status;
       await feedback.save();
       res.status(HttpStatus.OK).json({message : feedback.status == true ? "feedbackunblocked" : "feedbackBlocked"})
-
-      
     } catch (error) {
       next(error)
-      
     }
   }

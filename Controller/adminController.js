@@ -5,26 +5,27 @@ import { comparePassword } from "../utils/passwordService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.js";
 import { attachTokenCookie } from "../utils/cookie.js";
 import GenerateOtp from "../Services/generateOtp.js";
-import { saveOtp, verifyOtpRedis } from "../Services/Redis.js";
-import { sendPasswordResetOTP } from "../Services/emailService.js";
+import { sendPasswordResetOTP, otpVerify, saveOtp } from "../Services/emailService.js";
+import { HttpStatus } from "../Enums/enum.js";
 
 
 export const userLogin = async (req, res, next) => {
   try {
 
     const { emailAddress, password } = req.body;
-    // console.log(req)
-    console.log(emailAddress, password)
+    
     if (!emailAddress) {
       throw AppError.conflict("Missing Emailaddress");
     }
     if (!password) {
       throw AppError.conflict("Missing Password");
     }
+
     const adminDetails = await AdminModel.findOne({ emailAddress: emailAddress });
     if (!adminDetails) {
-      throw AppError.validation("User Not Registered");
+      throw AppError.validation("User not found!");
     }
+
     const comparedPassword = await comparePassword(
       password,
       adminDetails.password
@@ -32,22 +33,33 @@ export const userLogin = async (req, res, next) => {
     if (!comparedPassword) {
       throw AppError.validation("Password Not Mathing");
     }
+
+    if(adminDetails.isBlocked) {
+      return res.status(400).json({
+      'message': 'Your account has been blocked!',
+      'isBlocked': adminDetails.isBlocked
+    });
+    }
+
     const accessToken = generateAccessToken(adminDetails._id)
     if(!accessToken){
       throw AppError.conflict("Error creating accessToken")
     }
-    // console.log(accessToken , "AccessToken" , "\n" , "\n")
+   
     const refreshToken  = generateRefreshToken(adminDetails._id)
     if(!refreshToken){
       throw AppError.conflict("Error creating the refreshToken")
     }
-    // console.log(refreshToken  ,  "refreshToken")
+ 
     attachTokenCookie("AccessToken", accessToken, res)
     attachTokenCookie("RefreshToken", refreshToken, res)
-    
 
-
-    return res.status(200).json({ adminDetails });
+    return res.status(200).json({
+      'name': adminDetails.name,
+      'email': adminDetails.emailAddress,
+      'isRootAdmin': adminDetails.isRootAdmin,
+      'isBlocked': adminDetails.isBlocked
+    });
   } catch (error) {
     console.log(error, 'this is value');
     next(error);
@@ -98,72 +110,83 @@ export const userRegister = async (req, res, next) => {
     try {
       const {emailAddress} = req.body;
       const userDetails = await AdminModel.findOne({emailAddress : emailAddress})
-      console.log(emailAddress)
+      
       if(!userDetails){
-        throw AppError.conflict("Email Address not found")
+        throw AppError.conflict("No account found with this email.")
       }
+    
       const otp  = GenerateOtp()
-      const storedOtp =  await saveOtp(otp , emailAddress)
-      console.log(storedOtp , "storedOtp")
-      const {success , error} = await sendPasswordResetOTP(emailAddress , otp)
-      if(error){
-        console.log(error , "error in sending the mail")
+      await saveOtp(otp , emailAddress)
+      const success = await sendPasswordResetOTP(emailAddress , otp)
+      if(success){
+        return res.status(200).json({message: "OTP has been sent successfully."})
       }
-      return res.status(200).json({message: "Otp creaated send the mai;"})
-
+      return res.status(400).json({message: "Failed to send OTP. Check your connection."})
     } catch (error) {
       console.log(error)
       next(error)
-      
     }
   }
 
   export const verifyOtp = async(req, res , next)=>{
     try {
-      const {emailAddress , otp} = req.query;
-      if(!otp) throw AppError.conflict("OtP notRecieved");
-      if(!emailAddress) throw AppError.conflict("Email not recieved")
-        const verified = await verifyOtpRedis(otp, emailAddress)
-      if(!verified){
-        throw AppError.conflict("Error verifiying user")
+      const {emailAddress , otp} = req.body
+
+      if(!otp){
+        throw AppError.conflict("OTP not received? Try again!")
       }
-      return res.status(200).json({message : "Otp verified" , verified})
-      
+      if(!emailAddress){
+        throw AppError.conflict("Please enter your email to receive the code!")
+      }
+
+      const isOtpVerified = await otpVerify(otp, emailAddress)
+      if(isOtpVerified){
+        return res.status(200).json({message : "OTP verified"})
+      } else {
+        return res.status(400).json({message : "Invalid OTP!"})
+      }
     } catch (error) {
       console.log(error);
-      next(error)
-      
-      
+      next(error)    
     }
   }
 
   export const changePassword = async(req, res, next)=>{
     try {
       const {emailAddress , password} = req.body;
-      if(!emailAddress) throw AppError.conflict("no EmailAddress")
-        if(!password) throw AppError.conflict("no Password")
-          const isUser = await AdminModel.findOne({emailAddress : emailAddress })
-        if(!isUser){
-          throw AppError.conflict("User not registered")
-        }
-        isUser.password = password
-        await isUser.save()
-        return res.status(200).json({message : "Password changed succussfully"})
-      
-      
+
+      if(!emailAddress){
+        return res.status(409).json({email : "Email not recieved!"}) 
+      }
+      if(!password){
+        return res.status(400).json({password : "Password not recieved!"}) 
+      }
+
+      const isUser = await AdminModel.findOne({emailAddress : emailAddress })
+      if(!isUser){
+        return res.status(400).json({unregistered : "Email is not registered!"}) 
+      }
+
+      const hashedPassword = await hashPassword(password);
+      isUser.password = hashedPassword
+      await isUser.save()
+      return res.status(200).json({message : "Password changed succussfully"}) 
     } catch (error) {
       console.log(error)
       next(error)
-      
     }
   }
 
   export const createRootAdmin = async(req, res, next)=>{
     try {
-
-      
       const { emailAddress, password, name, isRootAdmin = false } = req.body;
   
+      if(req.isBlocked) {
+        return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
+      }
+      if(!req.role) {
+        return res.status(HttpStatus.BAD_REQUEST).json({ err: "Oops! You're not allowed to create users!" });
+      }
       if (!emailAddress) {
         throw AppError.conflict("Missing Email Address");
       }
@@ -179,15 +202,12 @@ export const userRegister = async (req, res, next) => {
   
 
       const hashedPassword = await hashPassword(password);
-  
-   
       const newUser = await AdminModel.create({
         emailAddress: emailAddress,
         password: hashedPassword,
         isRootAdmin,
         name,
       });
-      
   
       return res.status(201).json({
         message: "Registration successful",
@@ -196,7 +216,6 @@ export const userRegister = async (req, res, next) => {
           emailAddress: newUser.emailAddress,
         },
       });
-      
     } catch (error) {
       console.log(error)
       next(error)

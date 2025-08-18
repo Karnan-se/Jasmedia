@@ -1,12 +1,12 @@
 import mongoose, { Schema } from "mongoose";
+import { collection } from "../Enums/enum.js";
 
 
 const HistorySchema = new Schema({
-    createdBy:{type: mongoose.Schema.Types.ObjectId, ref:"admin"}, 
-    updatedBy:{type: mongoose.Schema.Types.ObjectId, ref:"admin"}, 
+    collectionName:{type:String ,  required: true , enum: [collection.CATEGORY, collection.PORTFOLIO, collection.FEEDBACK] },
     collectionId: { type: mongoose.Schema.Types.ObjectId, required: true, refPath: 'collectionName' },
-    collectionName:{type:String ,  required: true , enum: ['category', 'Portfolio', "Feedback" ] },
+    updatedBy:{type: mongoose.Schema.Types.ObjectId, ref:"admin"}, 
     action:{type:String}
 },{timestamps: true})
 
-export const History =  mongoose.model("History", HistorySchema)
+export const history = mongoose.model("history", HistorySchema)

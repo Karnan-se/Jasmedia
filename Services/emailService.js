@@ -3,6 +3,7 @@ import { configKeys } from "../config.js"
 import { generateOTPEmailTemplate } from "./EmailTemplate.js"
 import { AdminModel } from "../Model/adminModel.js"
 import AppError from "../utils/AppError.js";
+import { contactEmailTemplate } from "./ContactEmailTemplate.js";
 
 
 const transporter = nodemailer.createTransport({
@@ -67,6 +68,25 @@ export const otpVerify = async (otp, emailAddress) => {
     return false
   } catch (error) {
     throw error
+  }
+}
+
+
+export const sendContactMail = async (name, fromMail, number, message) => {
+  try {
+    const mailOption = {
+      from: fromMail,
+      to: configKeys.Mail,
+      subject: 'User Enquiry',
+      html: contactEmailTemplate(name, fromMail, number, message)
+    }
+
+    const info = await transporter.sendMail(mailOption)
+    console.log('email sented :', info.messageId)
+    return true
+  } catch (error) {
+    console.log(error)
+    return false
   }
 }
 

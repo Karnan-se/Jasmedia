@@ -5,7 +5,7 @@ import { comparePassword } from "../utils/passwordService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.js";
 import { attachTokenCookie } from "../utils/cookie.js";
 import GenerateOtp from "../Services/generateOtp.js";
-import { sendPasswordResetOTP, otpVerify, saveOtp } from "../Services/emailService.js";
+import { sendPasswordResetOTP, otpVerify, saveOtp, sendContactMail } from "../Services/emailService.js";
 import { HttpStatus } from "../Enums/enum.js";
 
 
@@ -241,3 +241,6 @@ export const userRegister = async (req, res, next) => {
       
     }
   }
+
+
+  

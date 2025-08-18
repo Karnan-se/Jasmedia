@@ -1,7 +1,8 @@
 import { Portfolio } from "../Model/PortFolio.js"
-import { HttpStatus } from "../Enums/enum.js";
+import { actions, collection, HttpStatus } from "../Enums/enum.js";
 import AppError from "../utils/AppError.js";
 import { checkisRootAdmin } from "./adminController.js";
+import { createHistory } from "./historycontroller.js";
 
 
 export const createPortFolio = async(req, res, next)=>{
@@ -49,6 +50,7 @@ export const editPortfolio = async(req, res, next)=>{
         return next(AppError.notFound("Portfolio not found"));
       }
     
+      await createHistory(collection.PORTFOLIO, updatedPortfolio._id, requester.id, actions.UPDATE)
       res.status(HttpStatus.OK).json(updatedPortfolio);
     } catch (error) {
       next(error);
@@ -72,6 +74,8 @@ export const getPortFolio = async(req, res, next)=>{
     
   }
 }
+
+
 export const deletePortfolio = async (req, res, next) => {
   try {
     const requester = req.user
@@ -114,9 +118,15 @@ export const togglePortfolio = async(req, res, next)=>{
     }
             
     const portfolio = await Portfolio.findOne({_id:portfolioId})
+    if (!portfolio) {
+        return res.status(HttpStatus.NOT_FOUND).json({ message: "Portfolio not found" });
+    }
     portfolio.status = !portfolio.status;
     await portfolio.save()
-    res.status(HttpStatus.OK).json({message: "portfolio Blocked"})
+
+    const actionType = portfolio.status ? actions.UNBLOCK : actions.BLOCK;
+    await createHistory(collection.PORTFOLIO, portfolio._id, requester.id, actionType)
+    res.status(HttpStatus.OK).json({message: portfolio.status == false ? "Portfolio Blocked" : "Portfolio Unblocked"})
   } catch (error) {
     console.log(error)
     next(error)

@@ -1,7 +1,7 @@
-import { HttpStatus } from "../Enums/enum.js";
+import { actions, collection, HttpStatus } from "../Enums/enum.js";
 import { Feedback } from "../Model/FeedbackModel.js";
 import AppError from "../utils/AppError.js";
-import { checkisRootAdmin } from "./adminController.js";
+import { createHistory } from "./historycontroller.js";
 
 
 export const addFeedback = async (req, res, next) => {
@@ -33,7 +33,7 @@ export const editFeedback = async (req, res, next) => {
     if(requester.isBlocked) {
       return res.status(HttpStatus.FORBIDDEN).json({ message: "Your account is currently blocked!" });
     }
-            
+
     if (!feedback || !feedback._id) {
       throw AppError.conflict("No feedback or feedbackId provided");
     }
@@ -48,9 +48,8 @@ export const editFeedback = async (req, res, next) => {
       throw AppError.conflict("Feedback not found");
     }
 
-    res
-      .status(HttpStatus.OK)
-      .json({ message: "Feedback updated", data: updatedFeedback });
+    await createHistory(collection.FEEDBACK, updatedFeedback._id, requester.id, actions.UPDATE)
+    res.status(HttpStatus.OK).json({ message: "Feedback updated", data: updatedFeedback });
   } catch (error) {
     console.log(error);
     next(error);
@@ -117,9 +116,16 @@ export const getAllFeedback = async (req, res, next) => {
       if(!feedbackId){
         throw AppError.conflict("feedback Id is required")
       }
+
       const feedback = await Feedback.findOne({_id:feedbackId})
+      if (!feedback) {
+          return res.status(HttpStatus.NOT_FOUND).json({ message: "Feedback not found" });
+      }
       feedback.status = !feedback.status;
       await feedback.save();
+
+      const actionType = feedback.status ? actions.UNBLOCK : actions.BLOCK;
+      await createHistory(collection.FEEDBACK, feedback._id, requester.id, actionType)
       res.status(HttpStatus.OK).json({message : feedback.status == true ? "feedbackunblocked" : "feedbackBlocked"})
     } catch (error) {
       next(error)

@@ -5,6 +5,11 @@ import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.j
 import { attachTokenCookie } from "../utils/cookie.js";
 import { googleSignIncallback } from "../Services/googleService.js";
 import { configKeys } from "../config.js";
+import { Portfolio } from "../Model/PortFolio.js";
+import { collection, HttpStatus } from "../Enums/enum.js";
+import { Feedback } from "../Model/FeedbackModel.js";
+import { categoryModel } from "../Model/categoryModel.js";
+import { sendContactMail } from "../Services/emailService.js";
 
 export const userRegister = async (req, res, next) => {
   try {
@@ -112,3 +117,82 @@ export const googleSignIn  = async(req, res , next)=>{
     
   }
 }
+
+
+// Latest 6 portfolio 
+export const getLatestPortfolio = async (req, res, next) => {
+  try {
+    const portfolio = await Portfolio.find({ status: true })
+      .sort({ createdAt: -1 }) 
+      .limit(6)
+      .populate(collection.CATEGORY);
+
+    res.status(HttpStatus.OK).json({ data: portfolio });
+  } catch (error) {
+    console.log(error);
+    next(error); 
+  }
+};
+
+
+// All Feeback
+export const getAllFeedback = async (req, res, next) => {
+    try {          
+      const feedbacks = await Feedback.find({ status: true }).sort({ createdAt: -1 }); 
+      return res.status(HttpStatus.OK).json({ data: feedbacks });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  };
+
+
+  // All Portfolio 
+  export const getAllPortFolio = async (req, res, next) => {
+    try {
+      const portfolio = await Portfolio.find({ status: true })
+      .sort({ createdAt: -1 })
+      .populate("category");
+      res.status(HttpStatus.OK).json({ data: portfolio });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+
+  // All Category
+  export const getCategory = async(req, res, next)=>{
+      try {
+          const categories = await categoryModel.find(
+            { status: true },           
+            { name: 1, _id: 0 }         
+        );
+        const categoryNames = categories.map(category => category.name);
+        res.status(HttpStatus.OK).json({ category: categoryNames });
+      } catch (error) {
+          console.log(error)
+          throw error
+          
+      }
+
+  }
+
+
+  export const contactMail = async (req, res, next) => {
+    try {
+      const {name, email, phoneNumber, message} = req.body
+
+      if(!email) {
+        throw AppError.conflict('Enter your email!')
+      }
+      
+      const isSuccess = await sendContactMail(name, email, phoneNumber, message)
+      if(isSuccess) {
+        return res.status(200).json({message: "Message sent successfully!"})
+      }
+      return res.status(400).json({message: "Failed to send message. Please try again."})
+    } catch (error) {
+      
+    }
+  }

@@ -1,8 +1,10 @@
 import { categoryModel } from "../Model/categoryModel.js"
-import { HttpStatus } from "../Enums/enum.js";
+import { actions, HttpStatus } from "../Enums/enum.js";
 import AppError from "../utils/AppError.js";
 import { Portfolio } from "../Model/PortFolio.js";
-import { checkisRootAdmin } from "./adminController.js";
+import { createHistory } from "./historycontroller.js";
+import { collection } from "../Enums/enum.js";
+
 
 
 
@@ -41,13 +43,11 @@ export const getCategory = async(req, res, next)=>{
         })
 
         res.status(HttpStatus.OK).json({category : formatedCategory})
-        
     } catch (error) {
         console.log(error)
         throw error
         
     }
-
 }
 
 export const updateCategory = async (req, res, next) => {
@@ -74,6 +74,7 @@ export const updateCategory = async (req, res, next) => {
             throw AppError.conflict("Category not found");
         }
 
+        await createHistory(collection.CATEGORY, updatedCategory?._id, requester.id, actions.UPDATE)
         res.status(HttpStatus.OK).json({ message: "Category updated successfully", data: updatedCategory });
     } catch (error) {
         console.log(error);
@@ -94,22 +95,24 @@ export const toggleStatus = async(req, res, next)=>{
         }
         
         const category = await categoryModel.findOne({_id:categoryId})
+        if (!category) {
+            return res.status(HttpStatus.NOT_FOUND).json({ message: "Category not found" });
+        }
         category.status = !category.status;
-        if(category.status == false){
-            const portfolio = await Portfolio.updateMany({category:category._id}, {$set:{status:false}})
-            console.log(portfolio, "portfolio blocked")
+        await category.save()
 
-        }else{
-            const portfolio = await Portfolio.updateMany({category:category._id}, {$set:{status:true}})
-            console.log(portfolio, "portfolio unblocked")
+            const actionType = category.status ? actions.UNBLOCK : actions.BLOCK;
+            await createHistory(collection.CATEGORY, category._id, requester.id, actionType)
+
+        const portfolio = await Portfolio.updateMany({category:category._id}, {$set:{status: category.status}})
+        const updatedPortfolio = await Portfolio.find({category: category._id}, '_id')
+        for (const p of updatedPortfolio) {
+            await createHistory(collection.PORTFOLIO, p._id, requester.id, actionType)
         }
         
-        
-        await category.save()
         res.status(HttpStatus.OK).json({message:category.status == false ? "Category Blocked" : "Category Unblocked"})
     } catch (error) {
         throw error;
-        
     }
 }
 

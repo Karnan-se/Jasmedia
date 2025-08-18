@@ -17,4 +17,18 @@ export const HttpStatus = {
     NOT_IMPLEMENTED : 501,
     SERVICE_UNAVAILABLE : 503,
   }
+
+  export const actions = {
+    UPDATE: 'update',
+    BLOCK: 'block',
+    UNBLOCK: 'unblock',
+    UNBLOCK: 'unblock'
+  }
+
+  export const collection = {
+    ADMIN: 'admin',
+    CATEGORY: 'category',
+    PORTFOLIO: 'portfolio',
+    FEEDBACK: 'feedback'
+  }
   

@@ -1,6 +1,6 @@
 import mongoose  from "mongoose";
 import { Schema } from "mongoose";
-import { type } from "os";
+import { collection } from "../Enums/enum.js";
 
 const AdminSchema = new Schema({
     emailAddress: {type: String, required:true , unique: true },
@@ -11,4 +11,4 @@ const AdminSchema = new Schema({
     otp: {type:String, default:""}
 },{timestamps:true})
 
-export  const AdminModel = mongoose.model("admin", AdminSchema)
+export  const AdminModel = mongoose.model(collection.ADMIN, AdminSchema)

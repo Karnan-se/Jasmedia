@@ -1,31 +1,35 @@
-import { categoryModel } from "../Model/categoryModel"
-import { Feedback } from "../Model/FeedbackModel";
-import { History } from "../Model/history";
-import { Portfolio } from "../Model/PortFolio";
+import { HttpStatus } from "../Enums/enum.js"
+import { history } from "../Model/history.js"
 
-export const createHistory = async(collectionId,   collectionName ,updatedBy ,  action)=>{
+export const createHistory = async (collectionName, collectionId, updatedBy, action) => {
     try {
-        if(collectionName == "category" ){
-            const category = await categoryModel.findById(collectionId);
-            const createdBy = category.createdBy ?? null
-            const history = await History.create({collectionId, createdBy , collectionName , updatedBy , action })
-
-        }else if(collectionName == "Portfolio"){
-            const portfolio = await Portfolio.findById(collectionId);
-            const createdBY =  portfolio.createdBy ?? null
-            const history = await History.create({collectionId, createdBY , collectionName , updatedBy , action })
-
-        }else if(collectionName == "Feedback"){
-            const feedback = await Feedback.findById(collectionId)
-            const createdBy = feedback.createdBY ?? null;
-            const history= await History.create({collectionId, createdBy , collectionName , updatedBy , action})
-
-        }
-        
-        
+        const result = await history.create({collectionName, collectionId, updatedBy, action})
     } catch (error) {
-        console.log(error)
         next(error)
-        
     }
+}
+
+
+export const getHistory = async (req, res, next) => {
+    try {
+        const {collectionId, collectionName} = req.query
+        console.log('collectionId:', collectionId, 'collectionName:', collectionName )
+
+        if(!collectionId || !collectionName) {
+            return res.status(HttpStatus.BAD_REQUEST).json({'message': 'Unable to process history. Collection details are missing!'})
+        }
+
+        const collectionHistory = await history.find({
+            collectionId: collectionId,
+            collectionName: collectionName
+        }).populate('updatedBy', 'name emailAddress').sort({createdAt: -1})
+
+        if(collectionHistory.length == 0) {
+            return res.status(HttpStatus.BAD_REQUEST).json({'message': "No history found!"})
+        }
+        res.status(HttpStatus.OK).json(collectionHistory)
+    } catch (error) {
+        next(error)
+    }
+
 }

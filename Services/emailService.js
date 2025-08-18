@@ -3,7 +3,7 @@ import { configKeys } from "../config.js"
 import { generateOTPEmailTemplate } from "./EmailTemplate.js"
 import { AdminModel } from "../Model/adminModel.js"
 import AppError from "../utils/AppError.js";
-import { contactEmailTemplate } from "./ContactEmailTemplate.js";
+import { contactEmailTemplate } from "./contactEmailTemplate.js";
 
 
 const transporter = nodemailer.createTransport({
@@ -13,11 +13,6 @@ const transporter = nodemailer.createTransport({
     pass: 'ksyw xmuv squc ozqj',
   },
 });
-
-
-
-
-// hello hai hai
 
 export async function sendPasswordResetOTP(email, otp) {
   try {

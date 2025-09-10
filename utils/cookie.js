@@ -5,6 +5,7 @@ const attachTokenCookie = (cookieName, Token, res) => {
         httpOnly: true,
         secure: configKeys.NODE_ENV === "production",
         signed: false,
+        sameSite: "none",
         maxAge: cookieName === "AccessToken" ? configKeys.ACCESS_TOKEN_EXPIRES_IN : configKeys.REFRESH_TOKEN_EXPIRES_IN
     };
 

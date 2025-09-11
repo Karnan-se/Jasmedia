@@ -33,8 +33,7 @@ export const userLogin = async (req, res, next) => {
     if (!comparedPassword) {
       throw AppError.validation("Password Not Mathing");
     }
-
-    console.log(adminDetails.emailAddress, adminDetails.isBlocked, 'from login')
+    
     if(adminDetails.isBlocked) {
       return res.status(400).json({
       'message': 'Your account has been blocked!',

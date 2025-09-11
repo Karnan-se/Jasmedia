@@ -12,7 +12,6 @@ export const adminDashboard = async (req, res, next) => {
   try {
     const requester = req.user
     if(requester.isBlocked) {
-      console.log(requester.email, requester.isBlocked, 'is blocked to dashboard')
       return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
     }
 

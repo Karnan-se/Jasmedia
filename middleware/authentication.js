@@ -17,9 +17,9 @@ const jwtAuth = async (req, res, next) => {
     if(accessToken) {
       const { userId } = verifyAccessToken(accessToken);
       const admin = await AdminModel.findById(userId)
-      console.log('Admin instance from access:', admin._id, admin.isRootAdmin)
+      console.log('Admin instance from access:', admin._id, admin.isRootAdmin, admin.emailAddress)
       if (admin) {
-        req.user = { id: admin._id, role: admin.isRootAdmin, isBlocked: admin.isBlocked }
+        req.user = { id: admin._id, role: admin.isRootAdmin, isBlocked: admin.isBlocked, email: admin.emailAddress }
         return next();
       }
     }
@@ -31,11 +31,11 @@ const jwtAuth = async (req, res, next) => {
     const { userId } = verifyRefreshToken(refreshToken);
     console.log(`User ID: ${userId}`);
     const admin = await AdminModel.findById(userId)
-    console.log('Admin instance from refresh:', admin._id, admin.isRootAdmin)
+    console.log('Admin instance from refresh:', admin._id, admin.isRootAdmin, admin.emailAddress)
     if(admin){
       const newAccessToken = generateAccessToken(userId)
       attachTokenCookie("AccessToken", newAccessToken, res)
-      req.user = { id: admin._id, role: admin.isRootAdmin, isBlocked: admin.isBlocked }
+      req.user = { id: admin._id, role: admin.isRootAdmin, isBlocked: admin.isBlocked, email: admin.emailAddress }
       return next()
     } else {
       return res.status(HttpStatus.FORBIDDEN).json({ err: "Refresh Token is Invalid" });

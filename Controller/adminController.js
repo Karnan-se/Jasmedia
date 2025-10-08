@@ -180,11 +180,14 @@ export const userRegister = async (req, res, next) => {
   export const createRootAdmin = async(req, res, next)=>{
     try {
       const { emailAddress, password, name, isRootAdmin = false } = req.body;
+      const requester = req.user
+      console.log('hey iam here to create user', emailAddress, password, name, isRootAdmin)
+      console.log('role:', requester.role)
   
-      if(req.isBlocked) {
+      if(requester.isBlocked) {
         return res.status(HttpStatus.FORBIDDEN).json({ err: "Your account is currently blocked!" });
       }
-      if(!req.role) {
+      if(!requester.role) {
         return res.status(HttpStatus.BAD_REQUEST).json({ err: "Oops! You're not allowed to create users!" });
       }
       if (!emailAddress) {
@@ -200,6 +203,7 @@ export const userRegister = async (req, res, next) => {
         throw AppError.validation("Email Already Registered");
       }
   
+      console.log('yes i reach here ...................', emailAddress, password, isRootAdmin, name)
 
       const hashedPassword = await hashPassword(password);
       const newUser = await AdminModel.create({
@@ -225,7 +229,6 @@ export const userRegister = async (req, res, next) => {
 
   export const checkisRootAdmin = async(req )=>{
     try {
-      console.log(req.user.id , "userId got from the middleware ")
       if(!req.user.id){
         throw AppError.conflict("session Expired")
       }

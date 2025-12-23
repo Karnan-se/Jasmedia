@@ -29,6 +29,7 @@ export const HttpStatus = {
     ADMIN: 'admin',
     CATEGORY: 'category',
     PORTFOLIO: 'portfolio',
-    FEEDBACK: 'feedback'
+    FEEDBACK: 'feedback', 
+    MOVIE: ''
   }
   

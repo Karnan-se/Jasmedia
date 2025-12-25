@@ -30,6 +30,5 @@ export const HttpStatus = {
     CATEGORY: 'category',
     PORTFOLIO: 'portfolio',
     FEEDBACK: 'feedback', 
-    MOVIE: ''
   }
   

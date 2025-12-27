@@ -1,5 +1,5 @@
 import express from "express"
-import { changePassword, createRootAdmin, forgotPassword, userLogin, userRegister, verifyOtp } from "../Controller/adminController.js";
+import { changePassword, createRootAdmin, forgotPassword, userLogin, userRegister, verifyOtp, getLatestContacts } from "../Controller/adminController.js";
 import {addCategory, updateCategory, getCategory} from "../Controller/categoryController.js"
 import jwtAuth from "../middleware/authentication.js";
 import { RequestSignedUrl } from "../Controller/cloudinary.js";
@@ -46,6 +46,7 @@ adminrouter.get("/getAdmins", jwtAuth, adminDetails)
 adminrouter.put("/toggleAdmin", jwtAuth, toggleAdmin)
 adminrouter.delete("/deleteAdmin", jwtAuth, deleteAdmin)
 
+adminrouter.get("/contacts", jwtAuth, getLatestContacts)
 adminrouter.get("/gethistory", jwtAuth, getHistory)
 
 

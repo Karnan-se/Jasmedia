@@ -1,5 +1,6 @@
 import AppError from "../utils/AppError.js";
 import { AdminModel } from "../Model/adminModel.js";
+import { Contact } from "../Model/ContactModel.js";
 import { hashPassword } from "../utils/passwordService.js";
 import { comparePassword } from "../utils/passwordService.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwtService.js";
@@ -246,4 +247,12 @@ export const userRegister = async (req, res, next) => {
   }
 
 
-  
+  export const getLatestContacts = async (req, res, next) => {
+    try {
+        const contacts = await Contact.find().sort({ createdAt: -1 });
+        return res.status(HttpStatus.OK).json({ data: contacts });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+  };

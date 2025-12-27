@@ -10,6 +10,7 @@ import { collection, HttpStatus } from "../Enums/enum.js";
 import { Feedback } from "../Model/FeedbackModel.js";
 import { categoryModel } from "../Model/categoryModel.js";
 import { sendContactMail } from "../Services/emailService.js";
+import { Contact } from "../Model/ContactModel.js";
 
 export const userRegister = async (req, res, next) => {
   try {
@@ -187,12 +188,30 @@ export const getAllFeedback = async (req, res, next) => {
         throw AppError.conflict('Enter your email!')
       }
       
+      // Save to database
+      await Contact.create({
+        name,
+        email,
+        phoneNumber, 
+        message
+      })
+
+      // Maintain only 5 latest records
+      const count = await Contact.countDocuments();
+      if (count > 5) {
+        const oldestContact = await Contact.findOne().sort({ createdAt: 1 });
+        if (oldestContact) {
+            await Contact.findByIdAndDelete(oldestContact._id);
+        }
+      }
+
       const isSuccess = await sendContactMail(name, email, phoneNumber, message)
       if(isSuccess) {
         return res.status(200).json({message: "Message sent successfully!"})
       }
       return res.status(400).json({message: "Failed to send message. Please try again."})
     } catch (error) {
-      
+       console.log(error)
+       next(error)
     }
   }
